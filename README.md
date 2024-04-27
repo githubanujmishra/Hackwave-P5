@@ -19,4 +19,4 @@ To be updated.
 
 ## Contributing
 
-This project is made with the contribution of Prateek, Shobhit 
+This project is made with the contribution of Prateek, Shobhit, Anuj and Shivam 

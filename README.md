@@ -19,5 +19,4 @@ To be updated.
 
 ## Contributing
 
-This project is made with the contribution of Shobhit Patel, Shivam Patel and Anuj Mishra along with me.  
-
+This project is made with the contribution of Prateek.

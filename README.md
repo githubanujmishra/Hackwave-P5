@@ -8,7 +8,6 @@ Project Omega is a smart attendance system which takes in account of QR code as 
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 

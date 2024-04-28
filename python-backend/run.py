@@ -1,11 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from dotenv import load_dotenv
 import os
 from models import QRCode
-from qr_generator import generate_qr_code
-from qr_decoder import decode_qr_code
+import cv2
+import qrcode
+import numpy as np
 
-# Load environment variables from .env file
 load_dotenv()
 
 # Create Flask app
@@ -27,60 +27,67 @@ def generate_qr():
     if not email:
         return jsonify({"error": "Email ID not provided"}), 400
 
-    # Generate QR code and get unique key
-    unique_key, _ = generate_qr_code(email)
+    # Generate unique key
+    unique_key = os.urandom(16).hex()
 
-    # Save QR code data to the database
-    QRCode.create(email, unique_key)
+    # Generate QR code image
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(f"{email}-{unique_key}")
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
 
-    # Return the unique key in the response
-    return jsonify({"unique_key": unique_key})
+    # Save QR code image locally
+    qr_img_path = f"qr_codes/{unique_key}.png"
+    qr_img.save(qr_img_path)
+
+    # Save QR code URL to the database
+    qr_code_doc_id = QRCode.create(email, unique_key, qr_img_path)
+
+    # Return the QR code URL and document ID in the response
+    return jsonify({"qr_code_url": qr_img_path, "qr_code_doc_id": qr_code_doc_id}), 201
 
 
-@app.route("/decode_qr_code", methods=["POST"])
+@app.route("/decode_qr_code", methods=["GET"])
 def decode_qr():
     """
-    Endpoint to decode the provided QR code image and mark attendance.
-    Expects a file upload with the QR code image.
+    Endpoint to decode the provided QR code image using the webcam.
     """
-    if "file" not in request.files:
-        return jsonify({"error": "No file provided"}), 400
+    # Initialize webcam
+    cap = cv2.VideoCapture(0)
 
-    qr_image = request.files["file"]
+    # Initialize QR code detector
+    detector = cv2.QRCodeDetector()
 
-    if qr_image.filename == "":
-        return jsonify({"error": "No file selected"}), 400
+    while True:
+        # Capture frame from webcam
+        ret, frame = cap.read()
 
-    email, unique_key = decode_qr_code(qr_image)
+        # Detect QR codes in the frame
+        data, vertices, _ = detector.detectAndDecodeMulti(frame)
 
-    if email and unique_key:
-        # Mark attendance
-        if QRCode.mark_attendance(unique_key):
-            return jsonify({"message": "Attendance marked successfully"})
-        else:
-            return jsonify({"error": "Failed to mark attendance"}), 500
-    else:
-        return jsonify({"error": "Failed to decode QR code"}), 400
+        if data:
+            # Split data into email and unique key
+            email, unique_key = data.split("-")
 
+            # Mark attendance
+            if QRCode.mark_attendance(unique_key):
+                return jsonify({"message": "Attendance marked successfully", "email": email, "unique_key": unique_key})
+            else:
+                return jsonify({"error": "Failed to mark attendance"}), 500
 
-@app.route("/attendance_percentage", methods=["GET"])
-def attendance_percentage():
-    """
-    Endpoint to get attendance percentage for a given email ID.
-    Expects email ID as a query parameter.
-    """
-    email = request.args.get("email")
+        # Display the frame
+        cv2.imshow("QR Code Scanner", frame)
 
-    if not email:
-        return jsonify({"error": "Email ID not provided"}), 400
+        # Check for key press to exit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
-    # Calculate attendance percentage
-    attendance_info = QRCode.calculate_percentage(email)
+    # Release resources
+    cap.release()
+    cv2.destroyAllWindows()
 
-    # Return attendance information
-    return jsonify(attendance_info)
+    return jsonify({"error": "No QR code detected"}), 400
 
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
-

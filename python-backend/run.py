@@ -1,93 +1,76 @@
 from flask import Flask, request, jsonify, send_file
 from dotenv import load_dotenv
 import os
+from qr_generator import generate_qr_code
 from models import QRCode
 import cv2
-import qrcode
-import numpy as np
+from io import BytesIO
 
 load_dotenv()
 
-# Create Flask app
 app = Flask(__name__)
-
-# Initialize MongoDB connection
 app.config['MONGO_URI'] = os.getenv('MONGODB_URI')
-
 
 @app.route("/generate_qr_code", methods=["POST"])
 def generate_qr():
-    """
-    Endpoint to generate a QR code for the provided email ID.
-    Expects JSON data with the email ID in the request body.
-    """
+    data = request.json
+    email = data.get("email")
+    name = data.get("name")
+
+    if not email or not name:
+        return jsonify({"error": "Email ID or name not provided"}), 400
+
+    unique_key = generate_qr_code(email, name)
+
+    return jsonify({"qr_code_unique_key": unique_key}), 201
+
+@app.route("/decode_qr_code", methods=["GET"])
+def decode_qr_code():
+    cap = cv2.VideoCapture(0)
+    detector = cv2.QRCodeDetector()
+
+    while True:
+        ret, frame = cap.read()
+
+        cv2.imshow("QR Code Scanner", frame)
+
+        decoded_info, _, _, _ = detector.detectAndDecodeMulti(frame)
+
+        if decoded_info is not False and isinstance(decoded_info, str):
+            email, unique_key = decoded_info.split(",")
+            student = QRCode.find_by_unique_key(unique_key)
+            if student:
+                result = QRCode.mark_attendance(unique_key)
+                return jsonify(result), 200
+            else:
+                return jsonify({"error": "Student does not exist"}), 404
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+    return jsonify({"error": "No QR code detected"}), 400
+
+@app.route("/get_qr_image", methods=["POST"])
+def get_qr_image():
     data = request.json
     email = data.get("email")
 
     if not email:
         return jsonify({"error": "Email ID not provided"}), 400
 
-    # Generate unique key
-    unique_key = os.urandom(16).hex()
+    qr_code = QRCode.find_by_email(email)
 
-    # Generate QR code image
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(f"{email}-{unique_key}")
-    qr.make(fit=True)
-    qr_img = qr.make_image(fill_color="black", back_color="white")
-
-    # Save QR code image locally
-    qr_img_path = f"qr_codes/{unique_key}.png"
-    qr_img.save(qr_img_path)
-
-    # Save QR code URL to the database
-    qr_code_doc_id = QRCode.create(email, unique_key, qr_img_path)
-
-    # Return the QR code URL and document ID in the response
-    return jsonify({"qr_code_url": qr_img_path, "qr_code_doc_id": qr_code_doc_id}), 201
-
-
-@app.route("/decode_qr_code", methods=["GET"])
-def decode_qr():
-    """
-    Endpoint to decode the provided QR code image using the webcam.
-    """
-    # Initialize webcam
-    cap = cv2.VideoCapture(0)
-
-    # Initialize QR code detector
-    detector = cv2.QRCodeDetector()
-
-    while True:
-        # Capture frame from webcam
-        ret, frame = cap.read()
-
-        # Detect QR codes in the frame
-        data, vertices, _ = detector.detectAndDecodeMulti(frame)
-
-        if data:
-            # Split data into email and unique key
-            email, unique_key = data.split("-")
-
-            # Mark attendance
-            if QRCode.mark_attendance(unique_key):
-                return jsonify({"message": "Attendance marked successfully", "email": email, "unique_key": unique_key})
-            else:
-                return jsonify({"error": "Failed to mark attendance"}), 500
-
-        # Display the frame
-        cv2.imshow("QR Code Scanner", frame)
-
-        # Check for key press to exit
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # Release resources
-    cap.release()
-    cv2.destroyAllWindows()
-
-    return jsonify({"error": "No QR code detected"}), 400
-
+    if qr_code:
+        qr_image_bson = qr_code.get('qr_image')
+        if qr_image_bson:
+            return send_file(BytesIO(qr_image_bson), mimetype='image/jpeg'), 200
+        else:
+            return jsonify({"error": "No QR image found for the given email ID"}), 404
+    else:
+        return jsonify({"error": "No QR code found for the given email ID"}), 404
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)

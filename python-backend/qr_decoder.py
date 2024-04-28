@@ -1,29 +1,44 @@
-import qrcode
-from pyzbar.pyzbar import decode
-from PIL import Image
+import cv2
+from models import QRCode
 
-def decode_qr_code(image):
+def decode_qr_code():
     """
-    Decode the QR code image and extract email ID and unique key.
-
-    Args:
-        image (file): The QR code image file.
-
-    Returns:
-        tuple: A tuple containing the email ID and unique key extracted from the QR code.
+    Decode the provided QR code image using the webcam.
     """
-    # Load QR code image
-    qr_image = Image.open(image)
+    # Initialize webcam
+    cap = cv2.VideoCapture(0)
 
-    # Decode QR code
-    decoded_objects = decode(qr_image)
+    # Initialize QR code detector
+    detector = cv2.QRCodeDetector()
 
-    if decoded_objects:
-        # Extract data from QR code
-        qr_data = decoded_objects[0].data.decode("utf-8")
-        email = qr_data.split(",")[0].split(":")[1]
-        unique_key = qr_data.split(",")[1].split(":")[1]
+    while True:
+        # Capture frame from webcam
+        ret, frame = cap.read()
 
-        return email, unique_key
-    else:
-        return None, None
+        # Detect QR codes in the frame
+        data, vertices, _ = detector.detectAndDecodeMulti(frame)
+
+        if data:
+            # Split data into email and unique key
+            email, unique_key = data.split(",")
+
+            # Check if student exists
+            if QRCode.find_by_unique_key(unique_key):
+                # Mark attendance
+                result = QRCode.mark_attendance(unique_key)
+                return jsonify(result), 200
+            else:
+                return jsonify({"error": "Student does not exist"}), 404
+
+        # Display the frame
+        cv2.imshow("QR Code Scanner", frame)
+
+        # Check for key press to exit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Release resources
+    cap.release()
+    cv2.destroyAllWindows()
+
+    return jsonify({"error": "No QR code detected"}), 400

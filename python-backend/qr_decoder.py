@@ -1,22 +1,23 @@
 import qrcode
 from pyzbar.pyzbar import decode
+from PIL import Image
 
 
-def decode_qr_code(image_path):
+def decode_qr_code(image):
     """
     Decode the QR code image and extract email ID and unique key.
 
     Args:
-        image_path (str): Path to the QR code image file.
+        image (file): The QR code image file.
 
     Returns:
         tuple: A tuple containing the email ID and unique key extracted from the QR code.
     """
     # Load QR code image
-    image = qrcode.load(image_path)
+    qr_image = Image.open(image)
 
     # Decode QR code
-    decoded_objects = decode(image)
+    decoded_objects = decode(qr_image)
 
     if decoded_objects:
         # Extract data from QR code

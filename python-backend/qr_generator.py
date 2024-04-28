@@ -1,7 +1,6 @@
 import qrcode
 import uuid
 
-
 def generate_qr_code(email):
     """
     Generate a QR code for the given email ID and return a unique key.

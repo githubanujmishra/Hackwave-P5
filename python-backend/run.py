@@ -1,8 +1,17 @@
 from flask import Flask, request, jsonify
-from qr_generator import generate_qr_code
-from qr_decoder import decode_qr_code
+from dotenv import load_dotenv
+import os
+from models import QRCode
+from app import generate_qr_code, decode_qr_code
 
+# Load environment variables from .env file
+load_dotenv()
+
+# Create Flask app
 app = Flask(__name__)
+
+# Initialize MongoDB connection
+app.config['MONGODB_URI'] = os.getenv('MONGODB_URI')
 
 @app.route("/generate_qr_code", methods=["POST"])
 def generate_qr():
@@ -17,6 +26,8 @@ def generate_qr():
         return jsonify({"error": "Email ID not provided"}), 400
 
     unique_key = generate_qr_code(email)
+    # Save QR code data to the database
+    QRCode.create(email, unique_key)
 
     # Return the unique key in the response
     return jsonify({"unique_key": unique_key})

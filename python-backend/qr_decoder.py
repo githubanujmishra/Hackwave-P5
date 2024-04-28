@@ -2,7 +2,6 @@ import qrcode
 from pyzbar.pyzbar import decode
 from PIL import Image
 
-
 def decode_qr_code(image):
     """
     Decode the QR code image and extract email ID and unique key.

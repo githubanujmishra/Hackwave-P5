@@ -25,7 +25,7 @@ function About() {
       start : "40% 70%" , 
       end : "65% 70%" , 
       scrub : true , 
-    //   markers : true , 
+      markers : true , 
       // pin: true 
     }})
     tl2.from('.mid1 ,.mid2' , { 
@@ -35,7 +35,7 @@ function About() {
     })
   })
   return (
-    <div className='about w-full p-20 bg-[#CDEA68] rounded-tl-3xl rounded-tr-3xl text-black'>
+    <div  className='z-[1000] about w-full p-20 bg-[#A3FFD6] rounded-tl-3xl rounded-tr-3xl text-black'>
         <h1 className='up  text-[2.7vw] leading-[4vw] tracking-tight uppercase '>Ochi is a strategic partner for fast-growing tech businesses that need to raise funds, sell products, explain complex ideas, and hire great people.</h1>
         <div className='w-full flex gap-5 border-t-[1px] pt-10 mt-20 border-[#a1b562]'>
             <div className=' mid1 w-1/2'>

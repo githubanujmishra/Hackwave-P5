@@ -6,15 +6,31 @@ import { omega2 } from "../assets/index";
 import Markey from '../components/Markey';
 import Aboutlanding from '../components/Aboutlanding'
 import Line from '../components/line' 
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
+
 
 
 export default function Home() {
+  useGSAP(()=>{ 
+    gsap.from('.textstructure' , { 
+      opacity : 0 , 
+      duration : 1, 
+      delay: .5
+    },'a')
+    gsap.from('.qr ,.qrimg', {
+      opacity: 0 ,
+      delay: .5
+    },'a')
+    })
   return (
-   <div data-scroll data-scroll-section data-scroll-speed=".6" className='w-full h-screen bg-white pt-1'>
-    <div className='absolute blur-sm w-[32vh] h-[32vh] bg-red-500 top-[25vh] right-[15vh]'>
-      <img src="https://qrcodedynamic.com/themes/altum/assets/images/qr_code.svg" alt="" />
+   <div  className='w-full h-screen bg-white pt-1'>
+    <div className='absolute blur-sm w-[32vh] h-[32vh]  top-[25vh] right-[15vh]'>
+      <img className='qrimg' src="https://qrcodedynamic.com/themes/altum/assets/images/qr_code.svg" alt="" />
     </div>
-      <h1 className='absolute top-[37vh] right-[20vh] uppercase text-[2rem] font-bold text-red-500 bg-white p-2 '>qr scan </h1>
+      <h1 className='qr absolute top-[37vh] right-[20vh] uppercase text-[2rem] font-bold text-red-500 bg-white p-2 '>qr scan </h1>
     {/* <div className='absolute top-[60vh] right-[23vh] px-5 py-2 border-[2px] border-zinc-400 font-light text-md uppercase rounded-full'>scan qr</div> */}
         <div className="textstructure mt-40 px-20">
             {['welcome' , 'we our' , 'omega squad'].map((items , index) => {

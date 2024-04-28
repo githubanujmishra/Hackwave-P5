@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { omega } from "../assets/index";
-import { omega2 } from "../assets/index";
+
 
 // When the user is Logged in.
 function Header() {
@@ -25,8 +25,8 @@ function Header() {
           )}
 
           {currentUser ? (
-            <Link to="/community">
-              <li>Community</li>
+            <Link to="/dashboard">
+              <li>Dashboard</li>
             </Link>
           ) : (
             <Link to="/about">

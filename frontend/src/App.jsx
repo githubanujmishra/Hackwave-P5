@@ -5,16 +5,19 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
 import Create from './pages/Create';
-import Community from './pages/Community';
+import Dashboard from './components/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
 import Line from './components/line';
 
 
 import LocomotiveScroll from 'locomotive-scroll';
+
 export default function App() {
 
-  const locomotiveScroll = new LocomotiveScroll();
+
+const locomotiveScroll = new LocomotiveScroll();
+
   
   return (
     <BrowserRouter>
@@ -32,7 +35,7 @@ export default function App() {
           <Route path='/create' element={<Create />} />
         </Route>
         <Route element={<PrivateRoute />}>
-          <Route path='/community' element={<Community />} />
+          <Route path='/dashboard' element={<Dashboard />} />
         </Route>
       </Routes>
       <Line />

@@ -8,12 +8,18 @@ import Create from './pages/Create';
 import Community from './pages/Community';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
+import Line from './components/line';
 
+
+import LocomotiveScroll from 'locomotive-scroll';
 export default function App() {
 
+  const locomotiveScroll = new LocomotiveScroll();
+  
   return (
     <BrowserRouter>
       <Header />
+      
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About />} />
@@ -29,6 +35,8 @@ export default function App() {
           <Route path='/community' element={<Community />} />
         </Route>
       </Routes>
+      <Line />
     </BrowserRouter>
+    
   );
 }

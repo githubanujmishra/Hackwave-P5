@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import os
 from models import QRCode
-from app import generate_qr_code, decode_qr_code
+from app.qr_generator import generate_qr_code
+from app.qr_decoder import decode_qr_code
 
 # Load environment variables from .env file
 load_dotenv()
@@ -11,7 +12,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Initialize MongoDB connection
-app.config['MONGODB_URI'] = os.getenv('MONGODB_URI')
+app.config['MONGO_URI'] = os.getenv('MONGODB_URI')
 
 @app.route("/generate_qr_code", methods=["POST"])
 def generate_qr():

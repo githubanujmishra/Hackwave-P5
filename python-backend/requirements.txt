@@ -1,5 +1,5 @@
-Flask==2.1.0
-Flask-SQLAlchemy==3.0.0  # If you're using SQLAlchemy for database ORM
-SQLAlchemy==1.4.0         # Version may vary
-Flask-Migrate==3.1.0      # If you're using Flask-Migrate for database migrations
-Pillow==9.0.0             # For working with images (e.g., generating QR codes)
+Flask
+Flask-SQLAlchemy
+SQLAlchemy
+Flask-Migrate
+Pillow

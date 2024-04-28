@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from qr_generator import generate_qr_code
+from qr_decoder import decode_qr_code
 
 app = Flask(__name__)
 
@@ -19,6 +20,27 @@ def generate_qr():
 
     # Return the unique key in the response
     return jsonify({"unique_key": unique_key})
+
+@app.route("/decode_qr_code", methods=["POST"])
+def decode_qr():
+    """
+    Endpoint to decode the provided QR code image and extract email ID and unique key.
+    Expects a file upload with the QR code image.
+    """
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    qr_image = request.files["file"]
+
+    if qr_image.filename == "":
+        return jsonify({"error": "No file selected"}), 400
+
+    email, unique_key = decode_qr_code(qr_image)
+
+    if email and unique_key:
+        return jsonify({"email": email, "unique_key": unique_key})
+    else:
+        return jsonify({"error": "Failed to decode QR code"}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)

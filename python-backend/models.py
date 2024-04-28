@@ -1,6 +1,9 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Connect to MongoDB
 client = MongoClient(os.getenv('MONGODB_URI'))

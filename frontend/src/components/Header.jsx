@@ -7,20 +7,20 @@ import { omega2 } from "../assets/index";
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
   return (
-    <div className="bg-[#96d6d5] fixed w-[100%]">
+    <div  className="z-[10000000000] bg-gradient-to-r from-[#008DDA]/30   to-[#41C9E2]/60 mix-blend-darken fixed w-[100%] backdrop-opacity-10 backdrop-invert">
       <div className="flex justify-between items-center h-[13vh] p-3 px-[5%]">
         <Link to="/">
           <img src={omega} alt="omega" className="h-[8vh]" />
         </Link>
 
-        <ul className="flex gap-20 text-[1.2vw] font-bold uppercase text-white ">
+        <ul className="flex gap-20 text-[1.2vw] font-bold uppercase  ">
           {currentUser ? (
             <Link to="/create">
               <li>Create</li>
             </Link>
           ) : (
             <Link to="/">
-              <li>Home</li>
+              <li className="text-transparent bg-clip-text bg-gradient-to-r from-[#874CCC]/100 via-[#008DDA]   to-[#10439F]/80">Home</li>
             </Link>
           )}
 
@@ -30,7 +30,7 @@ function Header() {
             </Link>
           ) : (
             <Link to="/about">
-              <li>About</li>
+              <li className="text-transparent bg-clip-text bg-gradient-to-r from-[#874CCC]/100 via-[#008DDA]   to-[#10439F]/80">About</li>
             </Link>
           )}
           {currentUser ? (
@@ -43,7 +43,7 @@ function Header() {
             </Link>
           ) : (
             <Link to="/profile">
-              <li>Sign In</li>
+              <li className="text-transparent bg-clip-text bg-gradient-to-r from-[#874CCC]/100 via-[#008DDA]   to-[#10439F]/80">Sign In</li>
             </Link>
           )}
         </ul>

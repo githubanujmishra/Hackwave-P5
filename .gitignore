@@ -28,3 +28,4 @@ dist-ssr
 *.sw?
 .env
 >>>>>>> 1087ed0f7740dabbac42e46c8f4a3f0784af67b5
+python-backend/.venv/
